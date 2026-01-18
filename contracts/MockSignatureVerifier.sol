@@ -92,43 +92,17 @@ Else
 ([ ] enableAutoHarvest
 [ ] disableAutoHarvest
 [ ] enableMultiProtocol
-[ ] disableMultiProtocol
-[ ] routeToAave
-[ ] routeToYearn
-[ ] skimProfits
-[ ] emergencyExit
-
-Buttons
-	•	enableMultiProtocol()
-	•	disableMultiProtocol()
-
-⚠️ If this is OFF → funds stay where they are
-Nothing moves without permission.
+[ ] 
 
 
 
 ✅ Routing On / Off
 
 What it does
-	•	Allows the contract to decide where funds go
-
-Buttons
-	•	enableRouting()
-	•	disableRouting()
-
-💡 Routing OFF = safest mode
-💡 Routing ON = smarter yield (later)
+	•	Allows the contract to decide where funds 
 
 
-✓ Deposit
-✓ Manual harvest
-✓ Manual skim
-✗ Routing OFF
-✗ Automation OFF
-
-✓ Auto-harvest ON
-✓ Skim threshold set
-✗ Routing OFF
+✓ 
 
 
 
