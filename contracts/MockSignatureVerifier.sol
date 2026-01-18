@@ -147,6 +147,13 @@ Buttons
 
 
 
+Buttons + Permissions)
+        │
+        ├── Aave Module (Lending)
+        ├── Yearn Module (Vaults)
+        ├── Harvest Module (Rewards)
+        ├── Profit Skimmer
+        └── Automation Guard
 
 
 
