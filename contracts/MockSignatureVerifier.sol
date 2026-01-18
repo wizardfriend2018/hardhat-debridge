@@ -75,56 +75,13 @@ Strategy Controller Contract
         ├── Yearn Module (Vaults)
         ├── Harvest Module (Rewards)
         ├── Profit Skimmer
-        └── Automation Guard
-
-
-If Aave APY < Yearn APY by X%
-→ Route funds to Yearn
-Else
-→ Stay on Aave.  These are:
-	•	Functions inside the smart contract
-	•	Example: enableAutoHarvest(), disableRouting()
-	•	They exist on Ethereum, not on your phone UI
-
-([ ] enableAutoHarvest
-[ ] disableAutoHarvest
-[ ] enableMultiProtocol
-[ ] 
-
-
-
-✅ Routing On / Off
-
-What it does
-	•	Allows the contract to decide where funds 
+        └── Automation  
 
 
 ✓ 
 
 
 
-✓ Auto-harvest ON
-✓ Routing ON
-✓ Weekly automation
-✓ Emergency exit always available
-
-
-
-🔵 Advanced Mode (Only if comfortable)
-✓ Auto-harvest ON
-✓ Routing ON
-✓ Weekly automation
-✓ Emergency exit always available
-
-
-
-Buttons + Permissions)
-        │
-        ├── Aave Module (Lending)
-        ├── Yearn Module (Vaults)
-        ├── Harvest Module (Rewards)
-        ├── Profit Skimmer
-        └── Automation Guard
 
 
 
