@@ -1,26 +1,26 @@
 import {
   Context,
-  DummySignatureStorage,
+  SignersSignatureStorage,
   Submission,
 } from "@debridge-finance/desdk/lib/evm";
-import { deployMockContract } from "ethereum-waffle";
+import { Contract, ContractFactory, ethers } from "ethers";
+import { FunctionFragment } from "ethers/lib/utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 import {
   CallProxy,
+  CallProxy__factory,
   DeBridgeGate,
+  DeBridgeGate__factory,
+  ERC1967Proxy__factory,
+  MockSignatureVerifier__factory,
   MockWeth,
   MockWeth__factory,
 } from "../typechain";
 import { SentEvent } from "../typechain/@debridge-finance/contracts/contracts/interfaces/IDeBridgeGate";
 
+import buildinfo from "./buildinfo";
 import { getRandom } from "./utils";
-
-function _check(hre: HardhatRuntimeEnvironment) {
-  if (!["hardhat", "localhost"].includes(hre.network.name)) {
-    throw new Error("deBridge.emulator is intended for hardhat network only");
-  }
-}
 
 //
 // Define the state so we can ease deBridgeSimulator usage
@@ -30,12 +30,44 @@ interface InternalEmulatorState {
   currentGate?: DeBridgeGate;
   submissions: { [key: string]: Submission };
   latestScannedBlock: number;
+  coreInitialized: boolean;
+  validators: ethers.Signer[];
 }
 
 const STATE: InternalEmulatorState = {
   submissions: {},
   latestScannedBlock: 0,
+  coreInitialized: false,
+  validators: [],
 };
+
+function _check(hre: HardhatRuntimeEnvironment) {
+  if (!["hardhat", "localhost"].includes(hre.network.name)) {
+    throw new Error("deBridge.emulator is intended for hardhat network only");
+  }
+}
+
+async function _initializeCore(hre: HardhatRuntimeEnvironment): Promise<void> {
+  if (
+    !STATE.coreInitialized ||
+    // check if hardhat-network has been reset
+    (STATE.currentGate &&
+      "0x" === (await hre.ethers.provider.getCode(STATE.currentGate?.address)))
+  ) {
+    // import buildinfo
+    const { input, output, solcVersion } = buildinfo;
+    await hre.network.provider.request({
+      method: "hardhat_addCompilationResult",
+      params: [solcVersion, input, output],
+    });
+
+    // set validators
+    STATE.validators = (await hre.ethers.getSigners()).slice(0, 12);
+
+    // done
+    STATE.coreInitialized = true;
+  }
+}
 
 //
 // deployGate
@@ -48,28 +80,57 @@ export function makeDeployGate(
 ): DeployDebridgeGateFunction {
   _check(hre);
 
+  // this is a simple implementation of hardhat-upgrades plugin
+  // which puts the impl contract under the ERC1967Proxy umbrella
+  // and calls the initialize() method
+  async function deployProxified(
+    factory: ContractFactory,
+    args?: unknown[]
+  ): Promise<Contract> {
+    // find the initialize() function fragment
+    const initializeFuncFragment = factory.interface.fragments.find(
+      (fragment) =>
+        fragment.name === "initialize" && fragment.type === "function"
+    ) as FunctionFragment;
+    if (!initializeFuncFragment) {
+      throw new Error("Contact does not have the initialize() func");
+    }
+
+    // deploy the implementation contract
+    const impl = await factory.deploy();
+    await impl.deployed();
+
+    // deploy proxy, passing the impl address + the call to the initialize method
+    const [signer] = await hre.ethers.getSigners();
+    const Proxy = new ERC1967Proxy__factory(signer);
+    const proxy = await Proxy.deploy(
+      impl.address,
+      factory.interface.encodeFunctionData(initializeFuncFragment, args)
+    );
+    await proxy.deployed();
+
+    return factory.attach(proxy.address);
+  }
+
   return async function deployGate(): Promise<DeBridgeGate> {
+    await _initializeCore(hre);
+    const [signer] = await hre.ethers.getSigners();
+
     // setup WETH9 for wrapping
-    const Weth = (await hre.ethers.getContractFactory(
-      "MockWeth"
-    )) as MockWeth__factory;
+    const Weth = new MockWeth__factory(signer);
     const weth = (await Weth.deploy("wrapped Ether", "wETH")) as MockWeth;
     await weth.deployed();
 
-    const DeBridgeGateFactory = await hre.ethers.getContractFactory(
-      "DeBridgeGate"
-    );
-    const deBridgeGate = (await hre.upgrades.deployProxy(DeBridgeGateFactory, [
+    const DeBridgeGateFactory = new DeBridgeGate__factory(signer);
+    const deBridgeGate = (await deployProxified(DeBridgeGateFactory, [
       0,
       weth.address,
     ])) as DeBridgeGate;
     await deBridgeGate.deployed();
 
     // setup callproxy
-    const CallProxyFactory = await hre.ethers.getContractFactory("CallProxy");
-    const callProxy = (await hre.upgrades.deployProxy(
-      CallProxyFactory
-    )) as CallProxy;
+    const CallProxyFactory = new CallProxy__factory(signer);
+    const callProxy = (await deployProxified(CallProxyFactory)) as CallProxy;
     await callProxy.deployed();
 
     await callProxy.grantRole(
@@ -79,26 +140,14 @@ export function makeDeployGate(
     await deBridgeGate.setCallProxy(callProxy.address);
 
     // setup signature verifier
-    const Verifier = await hre.ethers.getContractFactory("SignatureVerifier");
-    const signatureVerifierMock = await deployMockContract(
-      (await hre.ethers.getSigners())[0],
-      [...Verifier.interface.fragments]
-    );
-    await signatureVerifierMock.mock.submit.returns();
-
+    const Verifier = new MockSignatureVerifier__factory(signer);
+    const signatureVerifierMock = await Verifier.deploy();
     await deBridgeGate.setSignatureVerifier(signatureVerifierMock.address);
 
     // setup chain support (loopback)
-    await deBridgeGate.setChainSupport(
-      hre.ethers.provider.network.chainId,
-      true,
-      false
-    );
-    await deBridgeGate.setChainSupport(
-      hre.ethers.provider.network.chainId,
-      true,
-      true
-    );
+    const chainId = await hre.ethers.provider.send("eth_chainId", []);
+    await deBridgeGate.setChainSupport(chainId, true, false);
+    await deBridgeGate.setChainSupport(chainId, true, true);
 
     // setup global fee
     // For emulation purposes, we pick a random value from a range so that
@@ -142,6 +191,7 @@ export function makeAutoClaimFunction(
   return async function autoClaim(
     claimContext: EmulatorClaimContext = {}
   ): Promise<string[]> {
+    await _initializeCore(hre);
     const gate = claimContext.gate || STATE.currentGate;
     if (!gate) {
       throw new Error("DeBridgeGate not yet deployed");
@@ -150,7 +200,7 @@ export function makeAutoClaimFunction(
     const evmContext = {
       deBridgeGateAddress: gate.address,
       provider: gate.provider,
-      signatureStorage: new DummySignatureStorage(),
+      signatureStorage: new SignersSignatureStorage(STATE.validators),
     };
 
     // pull all submissions (either from specific tx or from all recent blocks)
@@ -175,7 +225,7 @@ export function makeAutoClaimFunction(
     return Promise.all(
       claimsToExecute.map(async (claim) => {
         const args = await claim.getEncodedArgs();
-        await gate.claim(...args);
+        await gate.claim(...args, { gasLimit: 8_000_000 });
         return claim.submissionId.toString();
       })
     );

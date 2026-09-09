@@ -8,3 +8,7 @@ import "@debridge-finance/contracts/contracts/periphery/CallProxy.sol";
 import "@debridge-finance/contracts/contracts/transfers/SignatureVerifier.sol";
 
 import "@debridge-finance/contracts/contracts/mock/MockWeth.sol";
+
+import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
+
+import "./MockSignatureVerifier.sol";

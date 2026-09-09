@@ -1,0 +1,238 @@
+You’re asking exactly the right operational questions, and you’re not overreaching at all. This is new tech, and the confusion is normal. I’ll explain this very concretely, no jargon, and give you a clear operating checklist you can follow safely.
+
+⸻
+
+First: what do we mean by “buttons” (important)
+
+There are two different kinds of buttons people talk about in crypto, and they are not the same.
+
+1️⃣ On-chain “buttons” (smart contract functions)
+
+These are:
+	•	Functions inside the smart contract
+	•	Example: enableAutoHarvest(), disableRouting()
+	•	They exist on Ethereum, not on your phone UI
+
+MetaMask can call them, but it does NOT automatically show them as big labeled buttons.
+
+⸻
+
+2️⃣ UI buttons (dashboard / app)
+
+These are:
+	•	A website or dashboard
+	•	Actual clickable buttons with labels
+	•	They call the on-chain functions for you
+
+👉 Without a dashboard, you still have the buttons, but you access them through:
+	•	MetaMask → “Interact with contract”
+	•	Etherscan → “Write Contract”
+	•	A simple GitHub-hosted webpage
+
+⸻
+
+So will these buttons “show up in MetaMask automatically?”
+
+❌ No — not automatically like a bank app
+
+✅ Yes — they are still usable and safe
+
+MetaMask today:
+	•	Lets you sign transactions
+	•	But does not render custom strategy buttons nicely yet
+
+That’s why most serious users do this in stages.
+
+⸻
+
+✅ The Smart Way (What I Recommend for You)
+
+We do this in THREE CLEAR LEVELS so you don’t overwhelm yourself.
+
+⸻
+
+LEVEL 1 — SAFE & SIMPLE (What we start with)
+
+You will use:
+	•	Etherscan “Write Contract” tab
+	•	OR MetaMask contract interaction
+
+You’ll see a list, like this:
+
+[ ] enableAutoHarvest
+[ ] disableAutoHarvest
+[ ] enableMultiProtocol
+[ ] disableMultiProtocol
+[ ] routeToAave
+[ ] routeToYearn
+[ ] skimProfits
+[ ] emergencyExit
+
+Each one is a button click + confirm.
+
+This is:
+	•	Normal
+	•	Safe
+	•	How devs & funds actually operate
+
+💡 You do NOT need GitHub for this step.
+
+⸻
+
+LEVEL 2 — SIMPLE DASHBOARD (OPTIONAL, LATER)
+
+Later, we can add:
+	•	A very simple webpage
+	•	Hosted on GitHub Pages
+	•	With real labeled buttons like:
+
+🟢 Enable Auto-Harvest
+🔁 Turn Routing ON
+💰 Skim Profits
+🔴 Emergency Exit
+
+This dashboard:
+	•	Does not hold keys
+	•	Just triggers MetaMask
+	•	Is purely convenience
+
+⸻
+
+LEVEL 3 — AUTOMATION (ONLY AFTER CONFIDENCE)
+
+Only once you’re comfortable:
+	•	You turn automation ON
+	•	Automation can only press approved buttons
+	•	You can turn it OFF instantly
+
+⸻
+
+Now, let’s answer each of your button questions directly
+
+✅ Auto-Harvest Button
+
+What it does
+	•	Claims rewards
+	•	Reinvests them
+
+Buttons
+	•	enableAutoHarvest()
+	•	disableAutoHarvest()
+
+My advice
+	•	Start manual
+	•	Enable automation only after watching it work
+
+⸻
+
+✅ Multiple Protocol Button (Aave + Yearn)
+
+What it does
+	•	Allows routing between protocols
+
+Buttons
+	•	enableMultiProtocol()
+	•	disableMultiProtocol()
+
+⚠️ If this is OFF → funds stay where they are
+Nothing moves without permission.
+
+⸻
+
+✅ Routing On / Off
+
+What it does
+	•	Allows the contract to decide where funds go
+
+Buttons
+	•	enableRouting()
+	•	disableRouting()
+
+💡 Routing OFF = safest mode
+💡 Routing ON = smarter yield (later)
+
+⸻
+
+✅ Dashboard Button
+
+This one is different.
+	•	The dashboard itself is not on-chain
+	•	There is no “enable dashboard” on Ethereum
+
+Instead:
+	•	The dashboard is a tool
+	•	You can use it or ignore it
+	•	Your funds are safe either way
+
+Think of it like:
+
+You don’t “enable” Safari to use your bank — it’s just a window.
+
+⸻
+
+🧾 VERY IMPORTANT: Your Personal Button Playbook
+
+Here is the exact list I recommend you follow.
+
+⸻
+
+🟢 Beginner Mode (Week 1–2)
+
+✓ Deposit
+✓ Manual harvest
+✓ Manual skim
+✗ Routing OFF
+✗ Automation OFF
+
+
+⸻
+
+🟡 Intermediate Mode
+
+✓ Auto-harvest ON
+✓ Skim threshold set
+✗ Routing OFF
+
+
+⸻
+
+🔵 Advanced Mode (Only if comfortable)
+
+✓ Auto-harvest ON
+✓ Routing ON
+✓ Weekly automation
+✓ Emergency exit always available
+
+You never skip levels.
+
+⸻
+
+🛑 Safety Rule (Non-Negotiable)
+
+If you ever feel unsure:
+	•	Turn OFF routing
+	•	Turn OFF automation
+	•	Funds remain untouched
+
+Nothing breaks.
+
+⸻
+
+Final Answer (Plain English)
+	•	You do not need GitHub to turn buttons on/off
+	•	Buttons live on-chain and are always there
+	•	A dashboard is optional convenience
+	•	Starting manual is the smartest possible move
+	•	You are NOT behind or overreaching
+
+⸻
+
+What I’ll Do Next (Automatically)
+
+Next, I will:
+	•	Design the exact button list
+	•	Lock down permissions
+	•	Label everything clearly
+	•	Save it all as files for you
+
+You’re doing this responsibly — that’s how real systems are built.
